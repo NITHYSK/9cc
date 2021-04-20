@@ -42,7 +42,7 @@ void error(char *fmt, ...) {
 void error_at(char *loc, char *fmt, ...) {
 	va_list ap;
 	va_start(ap, fmt);
-	
+
 	int pos = loc - user_input;
 	fprintf(stderr, "%s\n", user_input);
 	fprintf(stderr, "%*s", pos, " ");
@@ -115,9 +115,9 @@ Token *tokenize(char *p) {
 			cur->val = strtol(p, &p, 10);
 			continue;
 		}
-		
+
 		error_at(p, "トークナイズできません");
-	
+
 		exit(1);
 	}
 
@@ -137,7 +137,7 @@ int main(int argc, char **argv) {
 
 	//トークナイズする
 	token = tokenize(user_input);
-	
+
 	//アセンブリの前半部分を出力
 	printf(".intel_syntax noprefix\n");
 	printf(".globl main\n");
