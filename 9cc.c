@@ -7,19 +7,20 @@
 
 //トークンの種類
 typedef enum {
-	TK_RESERVED,	//記号
-	TK_NUM,		//整数トークン
-	TK_EOF,		//入力の終わりを表すトークン
+
+	TK_RESERVED,  //記号
+	TK_NUM,	 //整数トークン
+	TK_EOF,	 //入力の終わりを表すトークン
 } TokenKind;
 
 typedef struct Token Token;
 
 //トークン型
 struct Token {
-	TokenKind kind;	//トークンの型
-	Token *next;	//次の入力トークン
-	int val;	//kindがTK_NUMの場合、その数値
-	char *str;	//トークン文字列
+	TokenKind kind;	 //トークンの型
+	Token *next;	 //次の入力トークン
+	int val;	 // kindがTK_NUMの場合、その数値
+	char *str;	 //トークン文字列
 };
 
 //現在着目しているトークン
@@ -29,11 +30,11 @@ Token *token;
 char *user_input;
 
 //エラーを報告するための関数
-//printfと同じ引数を取る
+// printfと同じ引数を取る
 void error(char *fmt, ...) {
 	va_list ap;
-	va_start(ap,fmt);
-	vfprintf(stderr,fmt,ap);
+	va_start(ap, fmt);
+	vfprintf(stderr, fmt, ap);
 	fprintf(stderr, "\n");
 	exit;
 }
@@ -55,15 +56,14 @@ void error_at(char *loc, char *fmt, ...) {
 //次のトークンが期待している記号のときには、トークンを１つ読み進めて
 //真を返す。それ以外の場合には偽を返す。
 bool consume(char op) {
-	if (token->kind != TK_RESERVED || token->str[0] != op)
-		return false;
+	if (token->kind != TK_RESERVED || token->str[0] != op) return false;
 	token = token->next;
 	return true;
 }
 
 //次のトークンが期待している記号のときには、トークンを１つ読み進めて
 //それ以外の場合にはエラーを報告する。
-void expect(char op){
+void expect(char op) {
 	if (token->kind != TK_RESERVED || token->str[0] != op)
 		error_at(token->str, "'%c'ではありません", op);
 	token = token->next;
@@ -72,16 +72,13 @@ void expect(char op){
 //次のトークンが数値の場合、トークンを１つ読み進めて
 //それ以外の場合にはエラーを報告する。
 int expect_number() {
-	if (token->kind != TK_NUM)
-		error_at(token->str, "数ではありません");
+	if (token->kind != TK_NUM) error_at(token->str, "数ではありません");
 	int val = token->val;
 	token = token->next;
 	return val;
 }
 
-bool at_eof(){
-	return token->kind == TK_EOF;
-}
+bool at_eof() { return token->kind == TK_EOF; }
 
 //新しいトークンを作成してcurに繋げる
 Token *new_token(TokenKind kind, Token *cur, char *str) {
@@ -100,17 +97,17 @@ Token *tokenize(char *p) {
 
 	while (*p) {
 		//空白文字をスキップ
-		if(isspace(*p)){
+		if (isspace(*p)) {
 			p++;
 			continue;
 		}
 
-		if(*p == '+' || *p == '-'){
+		if (*p == '+' || *p == '-') {
 			cur = new_token(TK_RESERVED, cur, p++);
 			continue;
 		}
 
-		if(isdigit(*p)){
+		if (isdigit(*p)) {
 			cur = new_token(TK_NUM, cur, p);
 			cur->val = strtol(p, &p, 10);
 			continue;
@@ -126,13 +123,13 @@ Token *tokenize(char *p) {
 }
 
 int main(int argc, char **argv) {
-	if (argc != 2){
+	if (argc != 2) {
 		error("引数の個数が正しくありません");
 		return 1;
 	}
 
 	//グローバル変数に入力された文字列を格納
-	user_input = (char *)malloc(strlen(argv[1]));	
+	user_input = (char *)malloc(strlen(argv[1]));
 	sprintf(user_input, "%s", argv[1]);
 
 	//トークナイズする
@@ -149,8 +146,8 @@ int main(int argc, char **argv) {
 
 	//`+<数>`あるいは`-<数>`というトークンの並びを消費しつつ
 	//アセンブリを出力
-	while (!at_eof()){
-		if(consume('+')){
+	while (!at_eof()) {
+		if (consume('+')) {
 			printf("	add rax, %d\n", expect_number());
 			continue;
 		}
