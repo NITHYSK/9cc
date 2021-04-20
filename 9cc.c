@@ -25,6 +25,9 @@ struct Token {
 //現在着目しているトークン
 Token *token;
 
+//ユーザーが入力した数式
+char *user_input;
+
 //エラーを報告するための関数
 //printfと同じ引数を取る
 void error(char *fmt, ...) {
@@ -33,6 +36,20 @@ void error(char *fmt, ...) {
 	vfprintf(stderr,fmt,ap);
 	fprintf(stderr, "\n");
 	exit;
+}
+
+//エラー箇所を報告する
+void error_at(char *loc, char *fmt, ...) {
+	va_list ap;
+	va_start(ap, fmt);
+	
+	int pos = loc - user_input;
+	fprintf(stderr, "%s\n", user_input);
+	fprintf(stderr, "%*s", pos, " ");
+	fprintf(stderr, "^ ");
+	vfprintf(stderr, fmt, ap);
+	fprintf(stderr, "\n");
+	exit(1);
 }
 
 //次のトークンが期待している記号のときには、トークンを１つ読み進めて
@@ -48,7 +65,7 @@ bool consume(char op) {
 //それ以外の場合にはエラーを報告する。
 void expect(char op){
 	if (token->kind != TK_RESERVED || token->str[0] != op)
-		error("'%c'ではありません", op);
+		error_at(token->str, "'%c'ではありません", op);
 	token = token->next;
 }
 
@@ -56,7 +73,7 @@ void expect(char op){
 //それ以外の場合にはエラーを報告する。
 int expect_number() {
 	if (token->kind != TK_NUM)
-		error("数ではありません");
+		error_at(token->str, "数ではありません");
 	int val = token->val;
 	token = token->next;
 	return val;
@@ -98,8 +115,10 @@ Token *tokenize(char *p) {
 			cur->val = strtol(p, &p, 10);
 			continue;
 		}
-
-		error("トークナイズできません");
+		
+		error_at(p, "トークナイズできません");
+	
+		exit(1);
 	}
 
 	new_token(TK_EOF, cur, p);
@@ -112,9 +131,13 @@ int main(int argc, char **argv) {
 		return 1;
 	}
 
-	//トークナイズする
-	token = tokenize(argv[1]);
+	//グローバル変数に入力された文字列を格納
+	user_input = (char *)malloc(strlen(argv[1]));	
+	sprintf(user_input, "%s", argv[1]);
 
+	//トークナイズする
+	token = tokenize(user_input);
+	
 	//アセンブリの前半部分を出力
 	printf(".intel_syntax noprefix\n");
 	printf(".globl main\n");
@@ -137,6 +160,7 @@ int main(int argc, char **argv) {
 	}
 
 	printf("	ret\n");
+
 	return 0;
 }
 
