@@ -50,6 +50,9 @@ Node *expr();
 void expect(char);
 int expect_number();
 void gen(Node *);
+Node *primary();
+Node *new_node(NodeKind, Node *, Node *);
+Node *new_node_num(int);
 
 //ユーザーが入力した数式
 char *user_input;
@@ -84,6 +87,12 @@ void gen(Node *node) {
 
 	printf("	push rax\n");
 }
+// 単項演算子のノードを作成する関数
+Node *unary() {
+	if (consume('+')) return primary();
+	if (consume('-')) return new_node(ND_SUB, new_node_num(0), primary());
+	return primary();
+}
 
 // 二項演算子のノードを作成する関数
 Node *new_node(NodeKind kind, Node *lhs, Node *rhs) {
@@ -114,15 +123,15 @@ Node *primary() {
 	return new_node_num(expect_number());
 }
 
-// mul = primary ("*" primary | "/" primary)*
+// mul = unary ("*" unary | "/" unary)*
 Node *mul() {
-	Node *node = primary();
+	Node *node = unary();
 
 	for (;;) {
 		if (consume('*'))
-			node = new_node(ND_MUL, node, primary());
+			node = new_node(ND_MUL, node, unary());
 		else if (consume('/'))
-			node = new_node(ND_DIV, node, primary());
+			node = new_node(ND_DIV, node, unary());
 		else
 			return node;
 	}
@@ -272,6 +281,7 @@ int main(int argc, char **argv) {
 	printf("	pop rax\n");
 	printf("	ret\n");
 
+	free(user_input);
 	return 0;
 }
 
