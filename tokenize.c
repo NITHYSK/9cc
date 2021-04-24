@@ -11,6 +11,7 @@ Token *tokenize(char *p) {
 	Token *cur = &head;
 	int loop = 1;
 	while (*p) {
+		breakPoint();
 		dbg("loop:%d", loop++);
 		//空白文字をスキップ
 		if (isspace(*p)) {
@@ -118,7 +119,6 @@ Token *new_token(TokenKind kind, Token *cur, char *str) {
 	Token *tok = calloc(1, sizeof(Token));
 	tok->kind = kind;
 	tok->str = str;
-	// tok->len = len;
 	cur->next = tok;
 	return tok;
 }

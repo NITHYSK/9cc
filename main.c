@@ -1,4 +1,4 @@
-//#define __DEBUG__
+
 
 #include "9cc.h"
 
@@ -9,9 +9,11 @@ int main(int argc, char **argv) {
 	}
 
 	//グローバル変数に入力された文字列を格納
-	user_input = (char *)malloc(strlen(argv[1]));
-	sprintf(user_input, "%s", argv[1]);
-	setUserInput(user_input);
+	char *u_i = calloc(strlen(argv[1]) + 1, sizeof(char));
+	strcpy(u_i, argv[1]);
+	setUserInput(u_i);
+	dbg("argv[1] = \"%s\"", argv[1]);
+	dbg("u_i = \"%s\"", u_i);
 
 	//トークナイズしてパースする
 	setToken(tokenize(getUserinput()));
