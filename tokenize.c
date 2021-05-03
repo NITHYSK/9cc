@@ -18,7 +18,6 @@ Token *tokenize(char *p) {
 			p++;
 			continue;
 		}
-
 		if (strncmp(p, "==", 2) == 0 || strncmp(p, "!=", 2) == 0 ||
 		    strncmp(p, "<=", 2) == 0 || strncmp(p, ">=", 2) == 0) {
 			dbg();
@@ -27,28 +26,42 @@ Token *tokenize(char *p) {
 			p += 2;
 			continue;
 		}
-
 		if (*p == '>' || *p == '<') {
 			dbg();
 			cur = new_token(TK_RESERVED, cur, p++);
 			cur->len = 1;
 			continue;
 		}
-
 		if (*p == '(' || *p == ')') {
 			dbg();
 			cur = new_token(TK_RESERVED, cur, p++);
 			cur->len = 1;
 			continue;
 		}
-
 		if (*p == '+' || *p == '-' || *p == '*' || *p == '/') {
 			dbg();
 			cur = new_token(TK_RESERVED, cur, p++);
 			cur->len = 1;
 			continue;
 		}
-
+		if ('a' <= *p && *p <= 'z') {
+			dbg();
+			cur = new_token(TK_IDENT, cur, p++);
+			cur->len = 1;
+			continue;
+		}
+		if (*p == '=') {
+			dbg();
+			cur = new_token(TK_RESERVED, cur, p++);
+			cur->len = 1;
+			continue;
+		}
+		if (*p == ';') {
+			dbg();
+			cur = new_token(TK_RESERVED, cur, p++);
+			cur->len = 1;
+			continue;
+		}
 		if (isdigit(*p)) {
 			dbg();
 			cur = new_token(TK_NUM, cur, p);
@@ -59,37 +72,11 @@ Token *tokenize(char *p) {
 		}
 
 		error_at(p, "トークナイズできません");
-
 		exit(1);
 	}
 
 	new_token(TK_EOF, cur, p);
 	return head.next;
-}
-
-//次のトークンが期待している記号のときには、トークンを１つ読み進めて
-//真を返す。それ以外の場合には偽を返す。
-bool consume(char *op) {
-	if (getToken()->kind != TK_RESERVED) {
-		dbg("%s	false: kind=%s", op, TK_TABLE[getToken()->kind]);
-		return false;
-	} else if (strlen(op) != getToken()->len) {
-		dbg("%s	false: strlen(op)=%d , getToken()->len=%d, kind=%s", op,
-		    (int)strlen(op), getToken()->len,
-		    TK_TABLE[getToken()->kind]);
-		return false;
-	} else if (memcmp(getToken()->str, op, getToken()->len != 0)) {
-		dbg("%s	false: getToken()->str=\"%s\" , op=\"%s\", "
-		    "getToken()->len=%d, "
-		    "kind=%s",
-		    op, getToken()->str, op, getToken()->len,
-		    TK_TABLE[getToken()->kind]);
-		return false;
-	}
-
-	setToken(getToken()->next);
-	dbg("%s	true", op);
-	return true;
 }
 
 //次のトークンが期待している記号のときには、トークンを１つ読み進めて

@@ -21,9 +21,31 @@ Node *new_node_num(int val) {
 	node->val = val;
 }
 
+void program() {
+	int i = 0;
+	while (!at_eof()) setCode(stmt(), i++);
+	setCode(NULL, i);
+}
+
+Node *stmt() {
+	dbg();
+	Node *node = expr();
+	expect(";");
+	return node;
+}
+
 Node *expr() {
 	dbg();
-	return equality();
+	return assign();
+}
+
+Node *assign() {
+	Node *node = equality();
+	if (consume("=")) {
+		dbg("ND_ASSIGN");
+		node = new_node(ND_ASSIGN, node, assign());
+	}
+	return node;
 }
 
 Node *equality() {
@@ -110,9 +132,58 @@ Node *primary() {
 		return node;
 	}
 
+	// 次のトークンが識別子なら、その文字に応じてスタック上のオフセットが設定されたノードを作成
+	Token *tok = consume_ident();
+	if (tok) {
+		Node *node = calloc(1, sizeof(Node));
+		node->kind = ND_LVAR;
+		node->offset = (tok->str[0] - 'a' + 1) * 8;
+		return node;
+	}
+
 	// そうでなければ数値のはず
 	dbg("num");
 	return new_node_num(expect_number());
+}
+
+Node *ident() {}
+
+//次のトークンが期待している記号のときには、トークンを１つ読み進めて
+//真を返す。それ以外の場合には偽を返す。
+bool consume(char *op) {
+	if (getToken()->kind != TK_RESERVED) {
+		dbg("%s	false: kind=%s", op, TK_TABLE[getToken()->kind]);
+		return false;
+	} else if (strlen(op) != getToken()->len) {
+		dbg("%s	false: strlen(op)=%d , getToken()->len=%d, kind=%s", op,
+		    (int)strlen(op), getToken()->len,
+		    TK_TABLE[getToken()->kind]);
+		return false;
+	} else if (memcmp(getToken()->str, op, getToken()->len != 0)) {
+		dbg("%s	false: getToken()->str=\"%s\" , op=\"%s\", "
+		    "getToken()->len=%d, "
+		    "kind=%s",
+		    op, getToken()->str, op, getToken()->len,
+		    TK_TABLE[getToken()->kind]);
+		return false;
+	}
+
+	setToken(getToken()->next);
+	dbg("%s	true", op);
+	return true;
+}
+
+//次のトークンが識別子のときには、トークンをひとつ読み進める
+//それ以外の場合にはNULLを返す
+Token *consume_ident() {
+	if (getToken()->kind != TK_IDENT) {
+		dbg("false: getToken->kind=\"%s\"", TK_TABLE[getToken()->kind]);
+		return NULL;
+	}
+	Token *bufftoken = getToken();
+	dbg("%c	true", getToken()->str[0]);
+	setToken(getToken()->next);
+	return bufftoken;
 }
 
 #endif
