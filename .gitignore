@@ -1,5 +1,10 @@
 *~
 *.o
+*.swp
 tmp*
 a.out
 9cc
+obj/*
+lib/*
+!.gitkeep
+
