@@ -20,4 +20,6 @@ assert "100 > 1;"
 assert "100 < 1;"
 assert "100 >=1;"
 assert "100<= 1;"
+assert "foo=12; bar=34; foo+bar;"
+assert "hoge=12; _piyo_piyo=23; c=(hoge+_piyo_piyo)/5;"
 

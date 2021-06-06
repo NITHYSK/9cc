@@ -83,6 +83,6 @@
 	~9cc$ ./9cc "a=12; b=20; a+b;" > tmp.s
 	~9cc$ cc -o tmp tmp.s
 	~9cc$ ./tmp
-	~9cc$ $?
+	~9cc$ echo $?
 	32
 

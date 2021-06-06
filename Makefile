@@ -1,20 +1,42 @@
+OBJDIR	= obj
+SRCDIR	= src
+CC	= gcc
+TARGET	= 9cc
+
 CFLAGS=-std=c11 -g -static
-SRCS=$(wildcard *.c)
-OBJS=$(SRCS:.c=.o)
+SOURCES=$(wildcard $(SRCDIR)/*.c)
+OBJS=$(addprefix $(OBJDIR)/,$(patsubst %.c,%.o,$(subst $(SRCDIR)/,,$(SOURCES))))
 
-9cc: $(OBJS)
-	$(CC) -o 9cc $(OBJS) $(LDFLAGS)
+INCLUDE	= include
+IDFLAG	= -I./$(INCLUDE)
+LIBDIR	= lib
+LIB	= $(LIBDIR)/lib9cc.a
+#LDFLAGS	= -L./$(LIBDIR) -l9cc
+LDFLAGS	=
 
-$(OBJS): 9cc.h
+$(TARGET):	$(OBJS)	#$(LIB)
+	$(CC) $(CFLAGS) -o $@ $^ $(LDFLAGS)
 
-test: 9cc
+$(OBJDIR)/%.o:	$(SRCDIR)/%.c
+	$(CC) -o $@ -c $< $(IDFLAG)
+
+test:		$(TARGET)
 	./test.sh
 
-test1: 9cc
+test1:		$(TARGET)
 	./test1.sh
 
+$(LIB):		$(OBJS)
+	ar rcs $(LIB) $(patsubst $(OBJDIR)/main.o,,$(OBJS))
+
+libinstall:	$(LIB)
+	cp $< /usr/local/lib/mylib/$(subst $(LIBDIR)/,,$<)
+
+libupdate:	$(OBJS)	$(LIB)
+	make libinstall
+
 clean:
-	rm -f 9cc *.o *~ tmp*
+	rm -f 9cc tmp* lib/*.a obj/*.o
 
 .PHONY: test clean
 
