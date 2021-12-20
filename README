@@ -67,7 +67,13 @@
 		main:
 			push rbp
 			mov rbp, rsp
+			sub rsp, 2048
+			push 1
 			push 2
+			pop rdi
+			pop rax
+			add rax, rdi
+			push rax
 			push 3
 			pop rdi
 			pop rax
